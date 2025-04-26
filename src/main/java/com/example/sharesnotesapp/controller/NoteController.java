@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +20,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @RestController
@@ -64,10 +69,10 @@ public class NoteController {
     public ResponseEntity<String> deleteNote(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User) {
-                noteService.deleteNote(id);
+            noteService.deleteNote(id);
 
-                return ResponseEntity.ok().build();
-            }
+            return ResponseEntity.ok().build();
+        }
 
         return ResponseEntity.badRequest().build();
     }
@@ -109,7 +114,7 @@ public class NoteController {
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<List<NoteResponseDto>> getLatestNotes(){
+    public ResponseEntity<List<NoteResponseDto>> getLatestNotes() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
             List<Note> latestNotes = noteService.getLatestNotes(user);
@@ -123,7 +128,7 @@ public class NoteController {
     @GetMapping("/dates")
     public ResponseEntity<List<NoteResponseDto>> getNotesBetweenDates
             (@RequestParam("startDate") @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate startDate,
-             @RequestParam("endDate") @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate endDate){
+             @RequestParam("endDate") @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate endDate) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User) {
@@ -135,30 +140,87 @@ public class NoteController {
         return ResponseEntity.badRequest().build();
     }
 
-    @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> downloadNote(@PathVariable Long id, @RequestParam String type) {
+
+    @GetMapping("/download")
+    public ResponseEntity<byte[]> downloadNotes(
+            @RequestParam List<Long> ids,
+            @RequestParam String type) throws IOException {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User) {
-            Note note = noteService.getNoteById(id).orElseThrow(EntityNotFoundException::new);
-            byte[] fileContent = new byte[0];
 
-            if (FileType.valueOf(type).equals(FileType.txt)) {
-                fileContent = noteService.createTextFileContent(note).getBytes();
-            } else if (FileType.valueOf(type).equals(FileType.pdf)) {
-                fileContent = noteService.createPdfContent(note);
-            } else if (FileType.valueOf(type).equals(FileType.docx)) {
-                fileContent = noteService.createDocxContent(note);
-            }
-            else {
-                ResponseEntity.badRequest().build();
+            byte[] fileContent;
+            FileType fileType;
+            try {
+                fileType = FileType.valueOf(type);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Invalid file type".getBytes());
             }
 
-            HttpHeaders headers = noteService.downloadNote(note, FileType.valueOf(type));
-            headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+            if (ids.size() == 1) {
+                Note note = noteService.getNoteById(ids.get(0)).orElseThrow((() -> new EntityNotFoundException("No note with such id")));
+                fileContent = new byte[0];
 
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(fileContent);
+                if (fileType.equals(FileType.txt)) {
+                    fileContent = noteService.createTextFileContent(note).getBytes();
+                } else if (fileType.equals(FileType.pdf)) {
+                    fileContent = noteService.createPdfContent(note);
+                } else if (fileType.equals(FileType.docx)) {
+                    fileContent = noteService.createDocxContent(note);
+                } else {
+                    ResponseEntity.badRequest().body("Invalid file type");
+                }
+
+                HttpHeaders headers = noteService.downloadNote(note, FileType.valueOf(type));
+                headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+
+                return ResponseEntity.ok()
+                        .headers(headers)
+                        .body(fileContent);
+
+            }
+
+            else if (ids.size() > 1) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ZipOutputStream zos = new ZipOutputStream(baos);
+
+                for (Long id : ids) {
+                    Note note = noteService.getNoteById(id).orElseThrow(((() -> new EntityNotFoundException("No note with such id"))));
+
+                    fileContent = new byte[0];
+                    String fileName = noteService.buildFileName(note, fileType);
+
+                    if (fileType.equals(FileType.txt)) {
+                        fileContent = noteService.createTextFileContent(note).getBytes();
+                    } else if (fileType.equals(FileType.pdf)) {
+                        fileContent = noteService.createPdfContent(note);
+                    } else if (fileType.equals(FileType.docx)) {
+                        fileContent = noteService.createDocxContent(note);
+                    } else {
+                        return ResponseEntity.badRequest().body("Invalid file type".getBytes());
+                    }
+
+                    ZipEntry entry = new ZipEntry(fileName);
+                    zos.putNextEntry(entry);
+                    zos.write(fileContent);
+                    zos.closeEntry();
+                }
+
+                zos.close();
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"notes.zip\"");
+                headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+
+                return ResponseEntity.ok()
+                        .headers(headers)
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(baos.toByteArray());
+            }
+
+            else if (ids.isEmpty()) {
+                return ResponseEntity.badRequest().body("No notes selected".getBytes());
+            }
         }
 
         return ResponseEntity.badRequest().build();

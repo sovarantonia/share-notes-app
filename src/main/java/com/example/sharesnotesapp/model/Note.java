@@ -20,15 +20,7 @@ import java.util.Date;
 @Builder
 public class Note {
     @Id
-    @SequenceGenerator(
-            name = "note_sequence",
-            sequenceName = "note_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "note_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 
