@@ -17,15 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 public class Request {
     @Id
-    @SequenceGenerator(
-            name = "req_sequence",
-            sequenceName = "req_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "req_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 

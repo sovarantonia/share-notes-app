@@ -18,15 +18,7 @@ import java.time.LocalDate;
 @Builder
 public class Share {
     @Id
-    @SequenceGenerator(
-            name = "share_sequence",
-            sequenceName = "share_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "share_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 
