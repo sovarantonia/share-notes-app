@@ -6,6 +6,8 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -17,4 +19,5 @@ public class NoteResponseDto {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate date;
     private Integer grade;
+    private Set<TagResponseDto> tags;
 }

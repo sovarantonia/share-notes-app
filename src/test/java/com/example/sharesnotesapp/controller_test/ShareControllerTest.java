@@ -27,6 +27,7 @@ import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -58,7 +59,7 @@ public class ShareControllerTest {
 
         sender = new User(1L, "Sender", "Sender", "sender@example.com", "test123");
         receiver = new User(2L, "Receiver", "Receiver", "receiver@example.com", "test123");
-        note = new Note(1L, sender, LocalDate.parse("2024-10-10"), "A title", "Some text", 9);
+        note = new Note(1L, sender, LocalDate.parse("2024-10-10"), "A title", "Some text", 9, Set.of());
         share = new Share(1L, sender, receiver, note, LocalDate.parse("2024-10-15"));
 
         authentication = new UsernamePasswordAuthenticationToken(sender, sender.getPassword(), Collections.emptyList());
@@ -73,7 +74,7 @@ public class ShareControllerTest {
                 = new UserInfoDto(2L, receiver.getFirstName(), receiver.getLastName(), receiver.getEmail());
         UserResponseDto senderUResponseDto = new UserResponseDto(1L, sender.getFirstName(), sender.getLastName(), sender.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
         ShareResponseDto responseDto
                 = new ShareResponseDto(senderResponseDto, receiverResponseDto, noteResponseDto, LocalDate.parse("2024-10-15"));
 
@@ -143,7 +144,7 @@ public class ShareControllerTest {
                 = new UserInfoDto(2L, receiver.getFirstName(), receiver.getLastName(), receiver.getEmail());
         UserResponseDto senderUResponseDto = new UserResponseDto(1L, sender.getFirstName(), sender.getLastName(), sender.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
         ShareResponseDto responseDto
                 = new ShareResponseDto(senderResponseDto, receiverResponseDto, noteResponseDto, LocalDate.parse("2024-10-15"));
 
@@ -189,7 +190,7 @@ public class ShareControllerTest {
                 = new UserInfoDto(2L, receiver.getFirstName(), receiver.getLastName(), receiver.getEmail());
         UserResponseDto senderUResponseDto = new UserResponseDto(1L, sender.getFirstName(), sender.getLastName(), sender.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
         ShareResponseDto responseDto
                 = new ShareResponseDto(senderResponseDto, receiverResponseDto, noteResponseDto, LocalDate.parse("2024-10-15"));
 
@@ -234,9 +235,9 @@ public class ShareControllerTest {
         UserResponseDto userUResponseDto = new UserResponseDto(2L, user.getFirstName(), user.getLastName(), user.getEmail());
 
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(receiverUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(receiverUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
         NoteResponseDto noteResponseDto1
-                = new NoteResponseDto(userUResponseDto, 2L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(userUResponseDto, 2L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
 
         ShareResponseDto responseDto
                 = new ShareResponseDto(receiverResponseDto, senderResponseDto, noteResponseDto, LocalDate.parse("2024-10-15"));
@@ -286,7 +287,7 @@ public class ShareControllerTest {
                 = new UserResponseDto(1L, receiver.getFirstName(), receiver.getLastName(), receiver.getEmail());
 
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(receiverUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(receiverUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
 
         ShareResponseDto responseDto
                 = new ShareResponseDto(receiverResponseDto, senderResponseDto, noteResponseDto, LocalDate.parse("2024-10-15"));
@@ -325,7 +326,7 @@ public class ShareControllerTest {
                 = new UserInfoDto(2L, receiver.getFirstName(), receiver.getLastName(), receiver.getEmail());
         UserResponseDto senderUResponseDto = new UserResponseDto(1L, sender.getFirstName(), sender.getLastName(), sender.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(senderUResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
         ShareResponseDto responseDto
                 = new ShareResponseDto(senderResponseDto, receiverResponseDto, noteResponseDto, LocalDate.parse("2024-10-15"));
 

@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -90,7 +91,7 @@ class NoteControllerTest {
         noteRequestDto.setGrade(9);
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
-        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
 
         String requestBody = "{ \"title\": \"A title\", \"text\": \"Some text\", \"date\": \"05-05-2024\", \"grade\": 9}";
 
@@ -140,7 +141,7 @@ class NoteControllerTest {
     void testGetNoteById() throws Exception {
         Long id = 1L;
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
-        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
 
         when(noteService.getNoteById(id)).thenReturn(Optional.of(note));
         when(mapper.toDto(note)).thenReturn(noteResponseDto);
@@ -222,7 +223,7 @@ class NoteControllerTest {
         Long id = 1L;
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(userResponseDto, 1L, "New title", "Add new text", note.getDate(), 7);
+                = new NoteResponseDto(userResponseDto, 1L, "New title", "Add new text", note.getDate(), 7, Set.of());
 
         String requestBody = "{ \"title\": \"New title\", \"text\": \"Add new text\", \"date\": \"05-05-2024\", \"grade\": 7}";
 
@@ -281,10 +282,10 @@ class NoteControllerTest {
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(userResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(userResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
         NoteResponseDto secondNoteResponseDto
                 = new NoteResponseDto
-                (userResponseDto, 2L, secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade());
+                (userResponseDto, 2L, secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade(), Set.of());
 
         List<Note> notes = List.of(secondNote, note);
 
@@ -330,7 +331,7 @@ class NoteControllerTest {
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto secondNoteResponseDto
                 = new NoteResponseDto
-                (userResponseDto, secondNote.getId(), secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade());
+                (userResponseDto, secondNote.getId(), secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade(), Set.of());
 
         List<Note> notes = List.of(secondNote);
 
@@ -587,9 +588,9 @@ class NoteControllerTest {
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto2
-                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade());
+                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade(), Set.of());
         NoteResponseDto noteResponseDto3
-                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade());
+                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade(), Set.of());
 
         when(mapper.toDto(note2)).thenReturn(noteResponseDto2);
         when(mapper.toDto(note3)).thenReturn(noteResponseDto3);
@@ -648,9 +649,9 @@ class NoteControllerTest {
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto2
-                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade());
+                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade(), Set.of());
         NoteResponseDto noteResponseDto3
-                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade());
+                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade(), Set.of());
 
         when(mapper.toDto(note2)).thenReturn(noteResponseDto2);
         when(mapper.toDto(note3)).thenReturn(noteResponseDto3);

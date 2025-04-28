@@ -36,5 +36,6 @@ public interface NoteService {
     byte[] createPdfContent(Note note);
 
     byte[] createDocxContent(Note note);
-    public String buildFileName(Note note, FileType type);
+    String buildFileName(Note note, FileType type);
+    List<Note> getAllNotesByTag(User user, List<String> tags);
 }

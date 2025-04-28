@@ -2,11 +2,14 @@ package com.example.sharesnotesapp.service.note;
 
 import com.example.sharesnotesapp.model.FileType;
 import com.example.sharesnotesapp.model.Note;
+import com.example.sharesnotesapp.model.Tag;
 import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
 import com.example.sharesnotesapp.repository.NoteRepository;
+import com.example.sharesnotesapp.repository.TagRepository;
 import com.example.sharesnotesapp.repository.UserRepository;
 
+import com.example.sharesnotesapp.service.tag.TagService;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
@@ -28,6 +31,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class NoteServiceImpl implements NoteService {
 
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
+    private final TagService tagService;
 
     @Override
     public Note saveNote(Long userId, NoteRequestDto noteRequestDto) {
@@ -51,6 +57,9 @@ public class NoteServiceImpl implements NoteService {
                 .date(noteRequestDto.getDate())
                 .grade(noteRequestDto.getGrade())
                 .build();
+
+        Set<Tag> tags = tagService.findOrCreateTagsForUser(associatedUser, noteRequestDto.getTags());
+        createdNote.setTags(tags);
 
         return noteRepository.save(createdNote);
     }
@@ -79,6 +88,9 @@ public class NoteServiceImpl implements NoteService {
         if (noteRequestDto.getGrade() != 0) {
             updatedNote.setGrade(noteRequestDto.getGrade());
         }
+
+        Set<Tag> tags = tagService.findOrCreateTagsForUser(updatedNote.getUser(), noteRequestDto.getTags());
+        updatedNote.setTags(tags);
 
         return noteRepository.save(updatedNote);
     }
@@ -213,5 +225,10 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public String buildFileName(Note note, FileType type) {
         return "note_" + note.getTitle() + "_" + note.getDate() + "." + type.toString();
+    }
+
+    @Override
+    public List<Note> getAllNotesByTag(User user, List<String> tags) {
+        return noteRepository.findDistinctByUserAndTagsNameIn(user, tags);
     }
 }

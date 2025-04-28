@@ -90,10 +90,17 @@ public class NoteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<NoteResponseDto>> getAllNotesByUser() {
+    public ResponseEntity<List<NoteResponseDto>> getAllNotesByUser(@RequestParam(required = false) List<String> tagNames) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
-            List<Note> notes = noteService.getNotesByUser(user);
+            List<Note> notes;
+            if (tagNames != null && !tagNames.isEmpty()) {
+                notes = noteService.getAllNotesByTag(user, tagNames);
+            }
+            else {
+                notes = noteService.getNotesByUser(user);
+            }
+
 
             return ResponseEntity.ok(notes.stream().map(mapper::toDto).toList());
         }
