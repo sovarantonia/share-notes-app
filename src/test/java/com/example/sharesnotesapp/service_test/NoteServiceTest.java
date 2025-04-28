@@ -7,6 +7,7 @@ import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
 import com.example.sharesnotesapp.repository.NoteRepository;
 import com.example.sharesnotesapp.repository.UserRepository;
 import com.example.sharesnotesapp.service.note.NoteServiceImpl;
+import com.example.sharesnotesapp.service.tag.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,6 +21,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +31,8 @@ class NoteServiceTest {
     private UserRepository userRepository;
     @Mock
     private NoteRepository noteRepository;
+    @Mock
+    private TagService tagService;
 
     @InjectMocks
     private NoteServiceImpl noteService;
@@ -444,6 +448,33 @@ class NoteServiceTest {
 
         assertEquals(notes.get(0), note3);
         assertEquals(notes.get(1), note2);
+    }
+
+    @Test
+    void createNoteWithTag() {
+        note.setUser(user);
+
+        when(noteRepository.save(any(Note.class))).thenReturn(note);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        NoteRequestDto noteRequestDto = new NoteRequestDto();
+        noteRequestDto.setUserId(user.getId());
+        noteRequestDto.setTitle("A title");
+        noteRequestDto.setText("Text");
+        noteRequestDto.setDate(LocalDate.now());
+        noteRequestDto.setGrade(8);
+        noteRequestDto.setTags(Set.of("work", "project"));
+
+        Note savedNote = noteService.saveNote(user.getId(), noteRequestDto);
+
+        assertEquals(note.getUser(), savedNote.getUser());
+        assertEquals(note.getTitle(), savedNote.getTitle());
+        assertEquals(note.getText(), savedNote.getText());
+        assertEquals(note.getGrade(), savedNote.getGrade());
+        assertEquals(note.getDate(), savedNote.getDate());
+        assertEquals(note.getTags(), savedNote.getTags());
+
+        verify(noteRepository).save(any(Note.class));
     }
 }
 

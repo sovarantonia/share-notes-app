@@ -11,6 +11,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "notes")
@@ -38,4 +40,9 @@ public class Note {
     private String text;
 
     private Integer grade;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "note_tags", joinColumns = @JoinColumn(name = "note_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
 }

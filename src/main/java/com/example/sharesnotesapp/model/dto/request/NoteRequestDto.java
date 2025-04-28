@@ -9,6 +9,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class NoteRequestDto {
@@ -21,4 +23,5 @@ public class NoteRequestDto {
     @Min(value = 1, message = "Values must be integers between 1 and 10")
     @Max(value = 10, message = "Values must be integers between 1 and 10")
     private Integer grade = 0;
+    private Set<String> tags = new HashSet<>();
 }
