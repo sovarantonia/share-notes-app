@@ -11,6 +11,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "notes")
@@ -20,15 +22,7 @@ import java.util.Date;
 @Builder
 public class Note {
     @Id
-    @SequenceGenerator(
-            name = "note_sequence",
-            sequenceName = "note_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "note_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 
@@ -43,7 +37,14 @@ public class Note {
     @Column(nullable = false)
     private String title;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     private Integer grade;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "note_tags", joinColumns = @JoinColumn(name = "note_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
 }

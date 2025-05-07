@@ -2,11 +2,14 @@ package com.example.sharesnotesapp.service.note;
 
 import com.example.sharesnotesapp.model.FileType;
 import com.example.sharesnotesapp.model.Note;
+import com.example.sharesnotesapp.model.Tag;
 import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
 import com.example.sharesnotesapp.repository.NoteRepository;
+import com.example.sharesnotesapp.repository.TagRepository;
 import com.example.sharesnotesapp.repository.UserRepository;
 
+import com.example.sharesnotesapp.service.tag.TagService;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
@@ -28,6 +31,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class NoteServiceImpl implements NoteService {
 
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
+    private final TagService tagService;
 
     @Override
     public Note saveNote(Long userId, NoteRequestDto noteRequestDto) {
@@ -52,16 +58,18 @@ public class NoteServiceImpl implements NoteService {
                 .grade(noteRequestDto.getGrade())
                 .build();
 
+        Set<Tag> tags = tagService.findOrCreateTagsForUser(associatedUser, noteRequestDto.getTags());
+        createdNote.setTags(tags);
+
         return noteRepository.save(createdNote);
     }
 
     @Override
     public void deleteNote(Long id) {
-        if (noteRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException("Note does not exist");
-        }
-
-        noteRepository.deleteById(id);
+        Note note = noteRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Note does not exist"));
+        note.getTags().clear();
+        noteRepository.save(note);
+        noteRepository.delete(note);
     }
 
     @Override
@@ -79,6 +87,9 @@ public class NoteServiceImpl implements NoteService {
         if (noteRequestDto.getGrade() != 0) {
             updatedNote.setGrade(noteRequestDto.getGrade());
         }
+
+        Set<Tag> tags = tagService.findOrCreateTagsForUser(updatedNote.getUser(), noteRequestDto.getTags());
+        updatedNote.setTags(tags);
 
         return noteRepository.save(updatedNote);
     }
@@ -119,33 +130,23 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public HttpHeaders downloadNote(Note note, FileType type) {
         HttpHeaders headers = new HttpHeaders();
-        String filename = "note_" + note.getTitle() + "_" + note.getDate() + ".";
+        String filename = buildFileName(note, type);
 
         if (type.equals(FileType.txt)) {
             headers.setContentType(MediaType.TEXT_PLAIN);
             headers.setContentLength(createTextFileContent(note).getBytes().length);
-            headers.setContentDisposition(ContentDisposition
-                    .attachment()
-                    .filename(filename.concat(FileType.txt.toString()))
-                    .build());
-
         } else if (type.equals(FileType.pdf)) {
-
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentLength(createPdfContent(note).length);
-            headers.setContentDisposition(ContentDisposition
-                    .attachment()
-                    .filename(filename.concat(FileType.pdf.toString()))
-                    .build());
-
         } else if (type.equals(FileType.docx)) {
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentLength(createDocxContent(note).length);
-            headers.setContentDisposition(ContentDisposition
-                    .attachment()
-                    .filename(filename.concat(FileType.docx.toString()))
-                    .build());
         }
+
+        headers.setContentDisposition(ContentDisposition
+                .attachment()
+                .filename(filename)
+                .build());
 
         return headers;
     }
@@ -218,5 +219,15 @@ public class NoteServiceImpl implements NoteService {
         } catch (IOException e) {
             throw new RuntimeException("Error while creating DOCX content", e);
         }
+    }
+
+    @Override
+    public String buildFileName(Note note, FileType type) {
+        return "note_" + note.getTitle() + "_" + note.getDate() + "." + type.toString();
+    }
+
+    @Override
+    public List<Note> getAllNotesByTag(User user, List<String> tags) {
+        return noteRepository.findDistinctByUserAndTagsNameIn(user, tags);
     }
 }

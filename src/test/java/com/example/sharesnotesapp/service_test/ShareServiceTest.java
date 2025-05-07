@@ -18,6 +18,7 @@ import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -47,7 +48,7 @@ public class ShareServiceTest {
         sender.setFriendList(List.of(receiver));
         receiver.setFriendList(List.of(sender));
 
-        note = new Note(1L, sender, LocalDate.now(), "Title", "Text", 9);
+        note = new Note(1L, sender, LocalDate.now(), "Title", "Text", 9, Set.of());
 
         share = new Share(1L, sender, receiver, note, LocalDate.now());
     }

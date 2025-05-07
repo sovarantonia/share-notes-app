@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -90,7 +91,7 @@ class NoteControllerTest {
         noteRequestDto.setGrade(9);
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
-        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
 
         String requestBody = "{ \"title\": \"A title\", \"text\": \"Some text\", \"date\": \"05-05-2024\", \"grade\": 9}";
 
@@ -140,7 +141,7 @@ class NoteControllerTest {
     void testGetNoteById() throws Exception {
         Long id = 1L;
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
-        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+        NoteResponseDto noteResponseDto = new NoteResponseDto(userResponseDto, note.getId(), note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
 
         when(noteService.getNoteById(id)).thenReturn(Optional.of(note));
         when(mapper.toDto(note)).thenReturn(noteResponseDto);
@@ -222,7 +223,7 @@ class NoteControllerTest {
         Long id = 1L;
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(userResponseDto, 1L , "New title", "Add new text", note.getDate(), 7);
+                = new NoteResponseDto(userResponseDto, 1L, "New title", "Add new text", note.getDate(), 7, Set.of());
 
         String requestBody = "{ \"title\": \"New title\", \"text\": \"Add new text\", \"date\": \"05-05-2024\", \"grade\": 7}";
 
@@ -281,10 +282,10 @@ class NoteControllerTest {
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto
-                = new NoteResponseDto(userResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade());
+                = new NoteResponseDto(userResponseDto, 1L, note.getTitle(), note.getText(), note.getDate(), note.getGrade(), Set.of());
         NoteResponseDto secondNoteResponseDto
                 = new NoteResponseDto
-                (userResponseDto, 2L, secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade());
+                (userResponseDto, 2L, secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade(), Set.of());
 
         List<Note> notes = List.of(secondNote, note);
 
@@ -330,7 +331,7 @@ class NoteControllerTest {
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto secondNoteResponseDto
                 = new NoteResponseDto
-                (userResponseDto, secondNote.getId(), secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade());
+                (userResponseDto, secondNote.getId(), secondNote.getTitle(), secondNote.getText(), secondNote.getDate(), secondNote.getGrade(), Set.of());
 
         List<Note> notes = List.of(secondNote);
 
@@ -380,8 +381,9 @@ class NoteControllerTest {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(get("/notes/{id}/download", id)
-                        .param("type", FileType.txt.toString()))
+        mockMvc.perform(get("/notes/download")
+                        .param("type", FileType.txt.toString())
+                        .param("ids", id.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().bytes(fileContent));
     }
@@ -420,8 +422,9 @@ class NoteControllerTest {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(get("/notes/{id}/download", id)
-                        .param("type", FileType.pdf.toString()))
+        mockMvc.perform(get("/notes/download")
+                        .param("type", FileType.pdf.toString())
+                        .param("ids", id.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().bytes(fileContent));
 
@@ -458,7 +461,7 @@ class NoteControllerTest {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             document.write(byteArrayOutputStream);
 
-            fileContent =  byteArrayOutputStream.toByteArray();
+            fileContent = byteArrayOutputStream.toByteArray();
 
             HttpHeaders headers = new HttpHeaders();
 
@@ -475,13 +478,46 @@ class NoteControllerTest {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            mockMvc.perform(get("/notes/{id}/download", id)
-                            .param("type", FileType.docx.toString()))
+            mockMvc.perform(get("/notes/download")
+                            .param("type", FileType.docx.toString())
+                            .param("ids", id.toString()))
                     .andExpect(status().isOk());
 
         } catch (IOException e) {
             throw new RuntimeException("Error while creating DOCX content", e);
         }
+    }
+
+    @Test
+    void testDownloadNotes_zip() throws Exception {
+        Long id1 = 1L;
+        Long id2 = 2L;
+
+        Note note2 = new Note();
+        note2.setId(id2);
+        note2.setTitle("note2");
+        note2.setDate(LocalDate.parse("2025-05-05"));
+        note2.setGrade(5);
+        note2.setText("Text2");
+        note2.setUser(user);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        when(noteService.getNoteById(id1)).thenReturn(Optional.of(note));
+        when(noteService.getNoteById(id2)).thenReturn(Optional.of(note2));
+        when(noteService.createPdfContent(note)).thenReturn(new byte[]{1, 2, 3});
+        when(noteService.createPdfContent(note2)).thenReturn(new byte[]{4, 5, 6});
+        when(noteService.buildFileName(note, FileType.pdf)).thenReturn("note1.pdf");
+        when(noteService.buildFileName(note2, FileType.pdf)).thenReturn("note2.pdf");
+
+        mockMvc.perform(get("/notes/download")
+                        .param("ids", id1.toString())
+                        .param("ids", id2.toString())
+                        .param("type", FileType.pdf.toString()))
+                .andExpect(status().isOk());
+
+        verify(noteService, times(1)).createPdfContent(note);
+        verify(noteService, times(1)).createPdfContent(note2);
     }
 
     @Test
@@ -492,8 +528,9 @@ class NoteControllerTest {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(get("/notes/{id}/download", id)
-                        .param("type", FileType.txt.toString()))
+        mockMvc.perform(get("/notes/download")
+                        .param("type", FileType.txt.toString())
+                        .param("ids", id.toString()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(String.format("Note with id %s does not exist", id)));
     }
@@ -502,20 +539,26 @@ class NoteControllerTest {
     void testDownloadNote_InvalidFileType() throws Exception {
         Long id = 1L;
 
+        Note newNote = new Note();
         when(noteService.getNoteById(id)).thenReturn(Optional.of(note));
+        when(noteService.getNoteById(2L)).thenReturn(Optional.of(newNote));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(get("/notes/{id}/download", id)
-                        .param("type", "another-type"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/notes/download")
+                        .param("type", "another-type")
+                        .param("ids", id.toString())
+                        .param("ids", "2"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Invalid file type"));
     }
 
     @Test
     void testDownloadNote_UserNotLoggedIn() throws Exception {
         Long id = 1L;
 
-        mockMvc.perform(get("/notes/{id}/download", id))
+        mockMvc.perform(get("/notes/download")
+                        .param("ids", List.of(id).toString()))
                 .andExpect(status().isBadRequest());
     }
 
@@ -545,9 +588,9 @@ class NoteControllerTest {
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto2
-                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade());
+                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade(), Set.of());
         NoteResponseDto noteResponseDto3
-                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade());
+                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade(), Set.of());
 
         when(mapper.toDto(note2)).thenReturn(noteResponseDto2);
         when(mapper.toDto(note3)).thenReturn(noteResponseDto3);
@@ -574,13 +617,13 @@ class NoteControllerTest {
     }
 
     @Test
-    void testGetLatestNotes_NotLoggedIn() throws Exception{
+    void testGetLatestNotes_NotLoggedIn() throws Exception {
         mockMvc.perform(get("/notes/latest"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testGetNotesBetweenDates() throws Exception{
+    void testGetNotesBetweenDates() throws Exception {
         Note note2 = Note
                 .builder()
                 .id(2L)
@@ -606,20 +649,20 @@ class NoteControllerTest {
 
         UserResponseDto userResponseDto = new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         NoteResponseDto noteResponseDto2
-                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade());
+                = new NoteResponseDto(userResponseDto, note2.getId(), note2.getTitle(), note2.getText(), note2.getDate(), note2.getGrade(), Set.of());
         NoteResponseDto noteResponseDto3
-                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade());
+                = new NoteResponseDto(userResponseDto, note3.getId(), note3.getTitle(), note3.getText(), note3.getDate(), note3.getGrade(), Set.of());
 
         when(mapper.toDto(note2)).thenReturn(noteResponseDto2);
         when(mapper.toDto(note3)).thenReturn(noteResponseDto3);
 
-        when(noteService.getNotesBetweenDates(LocalDate.parse("2024-01-09"),LocalDate.parse("2024-05-01"))).thenReturn(List.of(note2, note3));
+        when(noteService.getNotesBetweenDates(LocalDate.parse("2024-01-09"), LocalDate.parse("2024-05-01"))).thenReturn(List.of(note2, note3));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         mockMvc.perform(get("/notes/dates")
-                .param("startDate", startDate)
-                .param("endDate", endDate))
+                        .param("startDate", startDate)
+                        .param("endDate", endDate))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].user.firstName", is("First-name")))
                 .andExpect(jsonPath("$[0].user.lastName", is("Last-name")))
@@ -638,12 +681,12 @@ class NoteControllerTest {
     }
 
     @Test
-    void testGetNotesBetweenDates_NotLoggedIn() throws Exception{
+    void testGetNotesBetweenDates_NotLoggedIn() throws Exception {
         LocalDate startDate = LocalDate.parse("2024-01-09");
         LocalDate endDate = LocalDate.parse("2024-05-01");
         mockMvc.perform(get("/notes/dates")
-                .param("startDate", startDate.toString())
-                .param("endDate", endDate.toString()))
+                        .param("startDate", startDate.toString())
+                        .param("endDate", endDate.toString()))
                 .andExpect(status().isBadRequest());
 
     }
