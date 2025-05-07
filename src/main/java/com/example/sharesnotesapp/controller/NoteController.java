@@ -108,7 +108,7 @@ public class NoteController {
         return ResponseEntity.badRequest().build();
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/filter-title")
     public ResponseEntity<List<NoteResponseDto>> getNotesFilteredByTitle(@RequestParam(defaultValue = "") String string) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
@@ -117,6 +117,20 @@ public class NoteController {
             return ResponseEntity.ok(filteredNotes.stream().map(mapper::toDto).toList());
         }
 
+        return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NoteResponseDto>> searchNotes(@RequestParam(required = false) String title,
+                                                             @RequestParam(required = false) String tag,
+                                                             @RequestParam(required = false) Integer grade,
+                                                             @RequestParam(required = false) @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate from,
+                                                             @RequestParam(required = false) @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate to) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
+            List<Note> notes = noteService.searchNotes(user, title, tag, grade, from, to);
+            return ResponseEntity.ok(notes.stream().map(mapper::toDto).toList());
+        }
         return ResponseEntity.badRequest().build();
     }
 

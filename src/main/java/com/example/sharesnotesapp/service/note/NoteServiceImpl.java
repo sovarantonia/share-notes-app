@@ -230,4 +230,9 @@ public class NoteServiceImpl implements NoteService {
     public List<Note> getAllNotesByTag(User user, List<String> tags) {
         return noteRepository.findDistinctByUserAndTagsNameIn(user, tags);
     }
+
+    @Override
+    public List<Note> searchNotes(User user, String title, String tag, Integer grade, LocalDate startDate, LocalDate endDate) {
+        return noteRepository.search(user.getId(), title, tag, grade, startDate, endDate);
+    }
 }

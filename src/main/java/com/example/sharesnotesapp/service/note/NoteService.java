@@ -38,4 +38,5 @@ public interface NoteService {
     byte[] createDocxContent(Note note);
     String buildFileName(Note note, FileType type);
     List<Note> getAllNotesByTag(User user, List<String> tags);
+    List<Note> searchNotes(User user, String title, String tag, Integer grade, LocalDate startDate, LocalDate endDate);
 }
