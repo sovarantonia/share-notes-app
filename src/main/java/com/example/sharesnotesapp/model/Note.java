@@ -37,6 +37,8 @@ public class Note {
     @Column(nullable = false)
     private String title;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     private Integer grade;

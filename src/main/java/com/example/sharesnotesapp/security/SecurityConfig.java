@@ -88,6 +88,7 @@ public class SecurityConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000") // Change this to your frontend URL
                         .allowedMethods("*")
+                        .exposedHeaders("Content-Disposition")
                         .allowedHeaders("*");
             }
         };
