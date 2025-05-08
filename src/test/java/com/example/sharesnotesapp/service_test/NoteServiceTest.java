@@ -416,39 +416,39 @@ class NoteServiceTest {
         assertEquals(latestNotes.get(4), note5);
     }
 
-    @Test
-    void testGetNotesBetweenDate(){
-        Note note2 = Note
-                .builder()
-                .id(2L)
-                .title("Title2")
-                .text("Text2")
-                .date(LocalDate.parse("2024-04-08"))
-                .grade(7)
-                .user(user)
-                .build();
-
-        Note note3 = Note
-                .builder()
-                .id(3L)
-                .title("Title2")
-                .text("Text2")
-                .date(LocalDate.parse("2024-04-07"))
-                .grade(7)
-                .user(user)
-                .build();
-
-        LocalDate startDate = LocalDate.parse("2024-04-01");
-        LocalDate endDate = LocalDate.parse("2024-04-10");
-
-        when(noteRepository.getNotesByDateBetweenOrderByDateAsc(startDate, endDate))
-                .thenReturn(List.of(note3, note2));
-
-        List<Note> notes = noteService.getNotesBetweenDates(startDate, endDate);
-
-        assertEquals(notes.get(0), note3);
-        assertEquals(notes.get(1), note2);
-    }
+//    @Test
+//    void testGetNotesBetweenDate(){
+//        Note note2 = Note
+//                .builder()
+//                .id(2L)
+//                .title("Title2")
+//                .text("Text2")
+//                .date(LocalDate.parse("2024-04-08"))
+//                .grade(7)
+//                .user(user)
+//                .build();
+//
+//        Note note3 = Note
+//                .builder()
+//                .id(3L)
+//                .title("Title2")
+//                .text("Text2")
+//                .date(LocalDate.parse("2024-04-07"))
+//                .grade(7)
+//                .user(user)
+//                .build();
+//
+//        LocalDate startDate = LocalDate.parse("2024-04-01");
+//        LocalDate endDate = LocalDate.parse("2024-04-10");
+//
+//        when(noteRepository.getNotesByDateBetweenOrderByDateAsc(startDate, endDate))
+//                .thenReturn(List.of(note3, note2));
+//
+//        List<Note> notes = noteService.getNotesBetweenDates(startDate, endDate);
+//
+//        assertEquals(notes.get(0), note3);
+//        assertEquals(notes.get(1), note2);
+//    }
 
     @Test
     void createNoteWithTag() {

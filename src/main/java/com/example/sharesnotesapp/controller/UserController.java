@@ -98,4 +98,16 @@ public class UserController {
 
         return ResponseEntity.badRequest().build();
     }
+
+    @GetMapping("/non-friends")
+    public ResponseEntity<List<UserResponseDto>> searchNonFriends(@RequestParam(defaultValue = "") String searchString){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user){
+            List<User> users = userService.searchUsersNotFriends(searchString, user);
+
+            return ResponseEntity.ok(users.stream().map(mapper::toDto).toList());
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
 }

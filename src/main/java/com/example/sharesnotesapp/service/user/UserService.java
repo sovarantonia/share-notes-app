@@ -18,4 +18,5 @@ public interface UserService extends UserDetailsService {
     List<User> getUserFriends(User user);
     List<User> searchUsers(String string, Long currentUserId);
     List<User> searchUserFriends(String string, Long currentUserId);
+    List<User> searchUsersNotFriends(String searchString, User user);
 }

@@ -5,6 +5,7 @@ import com.example.sharesnotesapp.model.Note;
 import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.mapper.NoteMapper;
 import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
+import com.example.sharesnotesapp.model.dto.response.GradeSummaryDto;
 import com.example.sharesnotesapp.model.dto.response.NoteResponseDto;
 import com.example.sharesnotesapp.service.note.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,15 +148,14 @@ public class NoteController {
     }
 
     @GetMapping("/dates")
-    public ResponseEntity<List<NoteResponseDto>> getNotesBetweenDates
+    public ResponseEntity<List<GradeSummaryDto>> getNotesBetweenDates
             (@RequestParam("startDate") @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate startDate,
              @RequestParam("endDate") @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate endDate) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User) {
-            List<Note> notes = noteService.getNotesBetweenDates(startDate, endDate);
+        if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
 
-            return ResponseEntity.ok(notes.stream().map(mapper::toDto).toList());
+            return ResponseEntity.ok(noteService.getNotesBetweenDates(startDate, endDate, user));
         }
 
         return ResponseEntity.badRequest().build();

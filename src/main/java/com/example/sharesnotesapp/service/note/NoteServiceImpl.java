@@ -5,6 +5,7 @@ import com.example.sharesnotesapp.model.Note;
 import com.example.sharesnotesapp.model.Tag;
 import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
+import com.example.sharesnotesapp.model.dto.response.GradeSummaryDto;
 import com.example.sharesnotesapp.repository.NoteRepository;
 import com.example.sharesnotesapp.repository.TagRepository;
 import com.example.sharesnotesapp.repository.UserRepository;
@@ -33,7 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import java.util.TreeMap;
 @Service
 @RequiredArgsConstructor
 public class NoteServiceImpl implements NoteService {
@@ -123,8 +124,21 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public List<Note> getNotesBetweenDates(LocalDate startDate, LocalDate endDate) {
-        return noteRepository.getNotesByDateBetweenOrderByDateAsc(startDate, endDate);
+    public List<GradeSummaryDto> getNotesBetweenDates(LocalDate startDate, LocalDate endDate, User user) {
+        List<Note> notes = noteRepository.getNotesByUserAndDateBetweenOrderByDateAsc(user, startDate, endDate);
+
+        return notes.stream()
+                .collect(Collectors.groupingBy(
+                        Note::getDate,
+                        TreeMap::new,
+                        Collectors.averagingInt(Note::getGrade)
+                ))
+                .entrySet().stream()
+                .map(entry -> new GradeSummaryDto(
+                        entry.getKey(),
+                        entry.getValue()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
