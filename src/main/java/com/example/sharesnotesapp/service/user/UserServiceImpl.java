@@ -150,4 +150,16 @@ public class UserServiceImpl implements UserService {
             return friends;
         }
     }
+
+
+    @Override
+    @Transactional
+    public List<User> searchUsersNotFriends(String searchString, User user) {
+        if (!searchString.isEmpty()) {
+            return userRepository.searchUsersNotFriendsWith(user.getId(), searchString);
+        }
+        return userRepository.getUsersNotFriendsWith(user.getId());
+    }
+
+
 }

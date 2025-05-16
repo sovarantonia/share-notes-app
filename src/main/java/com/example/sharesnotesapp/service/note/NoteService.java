@@ -4,6 +4,7 @@ import com.example.sharesnotesapp.model.FileType;
 import com.example.sharesnotesapp.model.Note;
 import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
+import com.example.sharesnotesapp.model.dto.response.GradeSummaryDto;
 import com.itextpdf.text.DocumentException;
 import org.springframework.http.HttpHeaders;
 
@@ -27,7 +28,7 @@ public interface NoteService {
 
     List<Note> getLatestNotes(User user);
 
-    List<Note> getNotesBetweenDates(LocalDate startDate, LocalDate endDate);
+    List<GradeSummaryDto> getNotesBetweenDates(LocalDate startDate, LocalDate endDate, User user);
 
     HttpHeaders downloadNote(Note note, FileType type);
 
@@ -38,4 +39,5 @@ public interface NoteService {
     byte[] createDocxContent(Note note);
     String buildFileName(Note note, FileType type);
     List<Note> getAllNotesByTag(User user, List<String> tags);
+    List<Note> searchNotes(User user, String title, String tag, Integer grade, LocalDate startDate, LocalDate endDate);
 }

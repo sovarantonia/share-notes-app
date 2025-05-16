@@ -20,4 +20,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> searchUsersExcludingCurrent(@Param("currentUserId") Long currentUserId,
                                            @Param("searchTerm") String searchTerm);
     List<User> findByIdNot(Long currentUserId);
+    @Query("""
+    SELECT u FROM User u
+    WHERE u.id != :userId AND u.id NOT IN (
+        SELECT f.id FROM User u2 JOIN u2.friendList f WHERE u2.id = :userId
+    )
+""")
+    List<User> getUsersNotFriendsWith(@Param("userId") Long userId);
+
+    @Query("""
+    SELECT u FROM User u
+    WHERE u.id != :userId
+      AND u.id NOT IN (
+        SELECT f.id FROM User u2 JOIN u2.friendList f WHERE u2.id = :userId
+      )
+      AND (
+        LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+        LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+        LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+      )
+""")
+    List<User> searchUsersNotFriendsWith(@Param("userId") Long userId, @Param("searchTerm") String searchTerm);
 }

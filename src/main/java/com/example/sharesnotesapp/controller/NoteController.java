@@ -5,6 +5,7 @@ import com.example.sharesnotesapp.model.Note;
 import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.mapper.NoteMapper;
 import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
+import com.example.sharesnotesapp.model.dto.response.GradeSummaryDto;
 import com.example.sharesnotesapp.model.dto.response.NoteResponseDto;
 import com.example.sharesnotesapp.service.note.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +109,7 @@ public class NoteController {
         return ResponseEntity.badRequest().build();
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/filter-title")
     public ResponseEntity<List<NoteResponseDto>> getNotesFilteredByTitle(@RequestParam(defaultValue = "") String string) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
@@ -117,6 +118,20 @@ public class NoteController {
             return ResponseEntity.ok(filteredNotes.stream().map(mapper::toDto).toList());
         }
 
+        return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NoteResponseDto>> searchNotes(@RequestParam(required = false) String title,
+                                                             @RequestParam(required = false) String tag,
+                                                             @RequestParam(required = false) Integer grade,
+                                                             @RequestParam(required = false) @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate from,
+                                                             @RequestParam(required = false) @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate to) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
+            List<Note> notes = noteService.searchNotes(user, title, tag, grade, from, to);
+            return ResponseEntity.ok(notes.stream().map(mapper::toDto).toList());
+        }
         return ResponseEntity.badRequest().build();
     }
 
@@ -133,15 +148,14 @@ public class NoteController {
     }
 
     @GetMapping("/dates")
-    public ResponseEntity<List<NoteResponseDto>> getNotesBetweenDates
+    public ResponseEntity<List<GradeSummaryDto>> getNotesBetweenDates
             (@RequestParam("startDate") @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate startDate,
              @RequestParam("endDate") @DateTimeFormat(fallbackPatterns = "dd-MM-yyyy") LocalDate endDate) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User) {
-            List<Note> notes = noteService.getNotesBetweenDates(startDate, endDate);
+        if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
 
-            return ResponseEntity.ok(notes.stream().map(mapper::toDto).toList());
+            return ResponseEntity.ok(noteService.getNotesBetweenDates(startDate, endDate, user));
         }
 
         return ResponseEntity.badRequest().build();

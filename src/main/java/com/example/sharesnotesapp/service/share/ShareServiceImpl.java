@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,24 +44,29 @@ public class ShareServiceImpl implements ShareService {
     public List<Share> getAllSharedNotesBetweenUsers(User user, String receiverEmail) {
         if (receiverEmail.isEmpty()) {
             return shareRepository.getSharesBySenderOrderBySentAtDesc(user);
-        } else {
-            User receiver = userRepository.findUserByEmail(receiverEmail)
-                    .orElseThrow(() -> new UsernameNotFoundException("User does not exist"));
-
-            return shareRepository.getSharesBySenderAndReceiverOrderBySentAtDesc(user, receiver);
         }
+
+        Optional<User> receiver = userRepository.findUserByEmail(receiverEmail);
+        if (receiver.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return shareRepository.getSharesBySenderAndReceiverOrderBySentAtDesc(user, receiver.get());
+
     }
 
     @Override
     public List<Share> getAllReceivedNotesBetweenUsers(User user, String senderEmail) {
         if (senderEmail.isEmpty()) {
             return shareRepository.getSharesByReceiverOrderBySentAtDesc(user);
-        } else {
-            User sender = userRepository.findUserByEmail(senderEmail)
-                    .orElseThrow(() -> new UsernameNotFoundException("User does not exist"));
-
-            return shareRepository.getSharesBySenderAndReceiverOrderBySentAtDesc(sender, user);
         }
+
+        Optional<User> sender = userRepository.findUserByEmail(senderEmail);
+        if (sender.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return shareRepository.getSharesBySenderAndReceiverOrderBySentAtDesc(sender.get(), user);
+
     }
 
     @Override
