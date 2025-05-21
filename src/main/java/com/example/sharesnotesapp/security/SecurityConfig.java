@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .exceptionHandling().authenticationEntryPoint(getUnauthorizedHandler())
                 .and()
                 .authorizeRequests()
-                .antMatchers("/", "/register").permitAll()
+                .antMatchers("/", "/register", "/admin/reset").permitAll()
                 .antMatchers("/login")
                 .anonymous()
                 .anyRequest()

@@ -4,10 +4,15 @@
       "name": "app.jwtSecret",
       "type": "java.lang.String",
       "description": "Description for app.jwtSecret."
-  },
+    },
     {
       "name": "app.jwtExpirationMs",
       "type": "java.lang.Integer",
       "description": "Description for app.jwtExpirationMs."
+    },
+    {
+      "name": "app.resetToken",
+      "type": "java.lang.String",
+      "description": "Description for app.resetToken."
     }
-] }
+  ] }
