@@ -28,6 +28,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     AND (:grade IS NULL OR n.grade = :grade)
     AND (:from IS NULL OR n.date >= :from)
     AND (:to IS NULL OR n.date <= :to)
+    ORDER BY n.date DESC
 """)
     List<Note> search(
             @Param("userId") Long userId,

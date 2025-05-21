@@ -47,4 +47,23 @@ public class Note {
     @JoinTable(name = "note_tags", joinColumns = @JoinColumn(name = "note_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
+
+    public Note(Long id, User user, LocalDate date, String title, String text, Integer grade) {
+        this.id = id;
+        this.user = user;
+        this.date = date;
+        this.title = title;
+        this.text = text;
+        this.grade = grade;
+        this.tags = new HashSet<>();
+    }
+
+    public Note(User user, LocalDate date, String title, String text, Integer grade) {
+        this.user = user;
+        this.date = date;
+        this.title = title;
+        this.text = text;
+        this.grade = grade;
+        this.tags = new HashSet<>();
+    }
 }

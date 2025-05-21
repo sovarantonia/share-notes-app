@@ -42,4 +42,11 @@ public class Request {
     public void prePersist() {
         this.status = Status.PENDING;
     }
+
+    public Request(User sender, User receiver, Status status, LocalDateTime sentAt) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.status = status;
+        this.sentAt = sentAt;
+    }
 }
