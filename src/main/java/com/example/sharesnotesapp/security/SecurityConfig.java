@@ -86,7 +86,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // Change this to your frontend URL
+                        .allowedOrigins("http://localhost:3000", "https://share-notes-app.netlify.app/") // Change this to your frontend URL
                         .allowedMethods("*")
                         .exposedHeaders("Content-Disposition")
                         .allowedHeaders("*");
