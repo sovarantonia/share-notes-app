@@ -1,6 +1,5 @@
 package com.example.sharesnotesapp;
 
-import com.example.sharesnotesapp.repository.*;
 import com.example.sharesnotesapp.service.ResetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -21,6 +20,6 @@ public class InitUserData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        resetService.reset();
+        resetService.resetForTesting();
     }
 }

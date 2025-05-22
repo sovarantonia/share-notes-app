@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
-    @Value("${app.resetToken}")
-    private String resetToken;
 
     private final ResetService resetService;
 
@@ -25,12 +23,9 @@ public class AdminController {
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<String> resetData(@RequestHeader("X-Reset-Auth") String token) {
-        if (!resetToken.equals(token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid reset token");
-        }
-
-        resetService.reset();
+    public ResponseEntity<String> resetData() {
+        resetService.deleteAllData();
+        resetService.resetForTesting();
         return ResponseEntity.ok("Database has been reset.");
     }
 }

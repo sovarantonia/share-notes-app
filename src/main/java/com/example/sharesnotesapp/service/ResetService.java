@@ -31,12 +31,17 @@ public class ResetService {
     }
 
     @Transactional
-    public void reset() {
+    public void deleteAllData() {
         shareRepository.deleteAll();
         requestRepository.deleteAll();
         noteRepository.deleteAll();
         tagRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Transactional
+    public void initialiseTestData() {
+
 
         //jane is tested
         User janeTest = new User("Jane", "Doe", "jane@test.com", passwordEncoder.encode("test123"));
@@ -109,5 +114,11 @@ public class ResetService {
                 new Share(maryToAdd, janeTest, notes.get(11), LocalDate.of(2025, 1, 14))  // note 12
         );
         shareRepository.saveAll(shares);
+    }
+
+    @Transactional
+    public void resetForTesting() {
+        deleteAllData();
+        initialiseTestData();
     }
 }
