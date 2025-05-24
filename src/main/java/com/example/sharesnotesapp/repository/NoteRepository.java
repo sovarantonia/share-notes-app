@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
             @Param("title") String title,
             @Param("tag") String tag,
             @Param("grade") Integer grade,
-            @Param("from") LocalDate from,
-            @Param("to") LocalDate to
+            @Param("from") Date from,
+            @Param("to") Date to
     );
 }

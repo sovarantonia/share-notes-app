@@ -29,6 +29,7 @@ import javax.persistence.EntityNotFoundException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -247,6 +248,8 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<Note> searchNotes(User user, String title, String tag, Integer grade, LocalDate startDate, LocalDate endDate) {
-        return noteRepository.search(user.getId(), title, tag, grade, startDate, endDate);
+        Date fromDate = (startDate != null) ? Date.valueOf(startDate) : null;
+        Date toDate = (endDate != null) ? Date.valueOf(endDate) : null;
+        return noteRepository.search(user.getId(), title, tag, grade, fromDate, toDate);
     }
 }
