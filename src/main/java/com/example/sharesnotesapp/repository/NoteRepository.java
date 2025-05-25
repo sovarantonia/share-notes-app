@@ -36,8 +36,8 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
             @Param("title") String title,
             @Param("tag") String tag,
             @Param("grade") Integer grade,
-            @Param("from") LocalDate from,
-            @Param("to") LocalDate to
+            @Param("from") Date from,
+            @Param("to") Date to
     );
     @Query("SELECT MIN(n.date) FROM Note n WHERE n.user.id = :userId")
     LocalDate findMinDateByUserId(@Param("userId") Long userId);

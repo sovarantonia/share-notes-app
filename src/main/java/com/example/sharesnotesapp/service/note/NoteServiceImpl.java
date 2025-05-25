@@ -21,8 +21,10 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -248,14 +250,19 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<Note> searchNotes(User user, String title, String tag, Integer grade, LocalDate startDate, LocalDate endDate) {
-        LocalDate fromDate = (startDate != null)
-                ? startDate
-                : noteRepository.findMinDateByUserId(user.getId());
+        try {
+            java.sql.Date sqlFrom = (startDate != null) ? java.sql.Date.valueOf(startDate) : null;
+            java.sql.Date sqlTo = (endDate != null) ? java.sql.Date.valueOf(endDate) : null;
 
-        LocalDate toDate = (endDate != null)
-                ? endDate
-                : noteRepository.findMaxDateByUserId(user.getId());
+            System.out.println("sqlFrom = " + sqlFrom);
+            System.out.println("sqlTo = " + sqlTo);
 
-        return noteRepository.search(user.getId(), title, tag, grade, fromDate, toDate);
+            return noteRepository.search(user.getId(), title, tag, grade, sqlFrom, sqlTo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Conversion failed", e);
+        }
+
+        //return noteRepository.search(user.getId(), title, tag, grade, fromDate, toDate);
     }
 }
