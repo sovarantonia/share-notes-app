@@ -250,19 +250,15 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<Note> searchNotes(User user, String title, String tag, Integer grade, LocalDate startDate, LocalDate endDate) {
-        try {
-            java.sql.Date sqlFrom = (startDate != null) ? java.sql.Date.valueOf(startDate) : null;
-            java.sql.Date sqlTo = (endDate != null) ? java.sql.Date.valueOf(endDate) : null;
-
-            System.out.println("sqlFrom = " + sqlFrom);
-            System.out.println("sqlTo = " + sqlTo);
-
-            return noteRepository.search(user.getId(), title, tag, grade, sqlFrom, sqlTo);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Conversion failed", e);
+        if (startDate == null && endDate != null) {
+            startDate = noteRepository.findMinDateByUserId(user.getId());
+            if (startDate == null) startDate = LocalDate.of(2000, 1, 1);
+        }
+        if (endDate == null && startDate != null) {
+            endDate = noteRepository.findMaxDateByUserId(user.getId());
+            if (endDate == null) endDate = LocalDate.of(2100, 1, 1);
         }
 
-        //return noteRepository.search(user.getId(), title, tag, grade, fromDate, toDate);
+        return noteRepository.search(user.getId(), title, tag, grade, startDate, endDate);
     }
 }
