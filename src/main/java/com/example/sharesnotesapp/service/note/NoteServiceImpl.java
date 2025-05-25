@@ -250,14 +250,16 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<Note> searchNotes(User user, String title, String tag, Integer grade, LocalDate startDate, LocalDate endDate) {
-        if (startDate == null && endDate != null) {
+        if (startDate == null) {
             startDate = noteRepository.findMinDateByUserId(user.getId());
-            if (startDate == null) startDate = LocalDate.of(2000, 1, 1);
+            if (startDate == null) {startDate = LocalDate.of(2000, 1, 1);}
         }
-        if (endDate == null && startDate != null) {
+
+        if (endDate == null) {
             endDate = noteRepository.findMaxDateByUserId(user.getId());
-            if (endDate == null) endDate = LocalDate.of(2100, 1, 1);
+            if (endDate == null) {endDate = LocalDate.of(2100, 1, 1);}
         }
+
 
         return noteRepository.search(user.getId(), title, tag, grade, startDate, endDate);
     }

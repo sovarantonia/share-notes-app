@@ -27,8 +27,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     AND (:title IS NULL OR LOWER(n.title) LIKE LOWER(CONCAT('%', :title, '%')))
     AND (:tag IS NULL OR t.name = :tag)
     AND (:grade IS NULL OR n.grade = :grade)
-    AND (:from IS NULL OR n.date >= :from)
-    AND (:to IS NULL OR n.date <= :to)
+    AND n.date BETWEEN :from AND :to
     ORDER BY n.date DESC
 """)
     List<Note> search(
