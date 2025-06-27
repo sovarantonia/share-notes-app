@@ -1,5 +1,6 @@
 package com.example.sharesnotesapp.service.user;
 
+import com.example.sharesnotesapp.model.Status;
 import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.request.UserNameDto;
 import com.example.sharesnotesapp.model.dto.request.UserRequestDto;
@@ -80,10 +81,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        if (userRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException("User does not exist");
+        User userToDelete = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User with id %s does not exist", id)));
+
+        // Remove the user from all friends' lists
+        for (User friend : userToDelete.getFriendList()) {
+            friend.getFriendList().remove(userToDelete);
         }
-        userRepository.deleteById(id);
+
+        // Clear their own friend list
+        userToDelete.getFriendList().clear();
+
+
+        // Save updates to affected users
+        userRepository.saveAll(userToDelete.getFriendList());
+        userRepository.save(userToDelete);
+        userRepository.flush();
+
+        // Now it's safe to delete
+        userRepository.delete(userToDelete);
     }
 
     @Override
@@ -155,10 +171,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public List<User> searchUsersNotFriends(String searchString, User user) {
+        List<Status> blockedStatuses = List.of(Status.PENDING, Status.ACCEPTED);
+
         if (!searchString.isEmpty()) {
-            return userRepository.searchUsersNotFriendsWith(user.getId(), searchString);
+            return userRepository.searchUsersNotFriendsWith(user.getId(), searchString, blockedStatuses);
         }
-        return userRepository.getUsersNotFriendsWith(user.getId());
+        return userRepository.getUsersNotFriendsWith(user.getId(), blockedStatuses);
     }
 
 

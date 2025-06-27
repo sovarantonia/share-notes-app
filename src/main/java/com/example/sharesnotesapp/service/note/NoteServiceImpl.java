@@ -23,6 +23,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -66,11 +67,13 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
+    @Transactional
     public void deleteNote(Long id) {
         Note note = noteRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Note does not exist"));
         note.getTags().clear();
         noteRepository.save(note);
-        noteRepository.delete(note);
+        noteRepository.flush();
+        noteRepository.deleteById(id);
     }
 
     @Override

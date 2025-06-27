@@ -39,4 +39,11 @@ public class Share {
 
     @Column(nullable = false)
     private LocalDate sentAt;
+
+    public Share(User sender, User receiver, Note sentNote, LocalDate sentAt) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.sentNote = sentNote;
+        this.sentAt = sentAt;
+    }
 }

@@ -38,6 +38,13 @@ public class Request {
     @Column(nullable = false)
     private LocalDateTime sentAt;
 
+    public Request(User sender, User receiver, Status status, LocalDateTime sentAt) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.status = status;
+        this.sentAt = sentAt;
+    }
+
     @PrePersist
     public void prePersist() {
         this.status = Status.PENDING;
