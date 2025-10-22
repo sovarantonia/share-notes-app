@@ -7,7 +7,6 @@ import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.model.dto.request.NoteRequestDto;
 import com.example.sharesnotesapp.model.dto.response.GradeSummaryDto;
 import com.example.sharesnotesapp.repository.NoteRepository;
-import com.example.sharesnotesapp.repository.TagRepository;
 import com.example.sharesnotesapp.repository.UserRepository;
 
 import com.example.sharesnotesapp.service.tag.TagService;
@@ -15,17 +14,18 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
 
 
 import java.io.ByteArrayOutputStream;
@@ -43,6 +43,7 @@ public class NoteServiceImpl implements NoteService {
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
     private final TagService tagService;
+
 
     @Override
     public Note saveNote(Long userId, NoteRequestDto noteRequestDto) {

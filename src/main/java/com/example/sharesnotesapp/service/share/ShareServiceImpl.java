@@ -6,11 +6,11 @@ import com.example.sharesnotesapp.model.User;
 import com.example.sharesnotesapp.repository.NoteRepository;
 import com.example.sharesnotesapp.repository.ShareRepository;
 import com.example.sharesnotesapp.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;

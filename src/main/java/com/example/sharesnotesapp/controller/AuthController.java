@@ -8,6 +8,7 @@ import com.example.sharesnotesapp.model.dto.response.UserLoginJwtDto;
 import com.example.sharesnotesapp.security.jwt.JwtUtils;
 import com.example.sharesnotesapp.service.user.UserService;
 
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
