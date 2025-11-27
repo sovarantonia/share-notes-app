@@ -63,7 +63,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurer()))
                 .exceptionHandling(exc -> exc.authenticationEntryPoint(getUnauthorizedHandler()))
-                .authorizeHttpRequests(req -> req.requestMatchers("/", "/register", "/admin/reset").permitAll())
+                .authorizeHttpRequests(req -> req.requestMatchers("/", "/register", "/admin/reset", "/user/email").permitAll())
                 .authorizeHttpRequests(req -> req.requestMatchers("/login").anonymous())
                 .authorizeHttpRequests(req -> req.anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())

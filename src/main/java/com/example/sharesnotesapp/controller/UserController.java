@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -29,9 +30,14 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id).orElseThrow(EntityNotFoundException::new);
+        User user = userService.getUserById(id);
 
         return ResponseEntity.ok(mapper.toDto(user));
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<UserResponseDto> findUserByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(mapper.toDto(userService.getUserByEmail(email)));
     }
 
     @PatchMapping("/{id}")

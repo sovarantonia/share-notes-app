@@ -28,20 +28,18 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Optional<User> getUserById(Long id) {
-        if (userRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException(String.format("User with id %s does not exist", id));
-        }
-        return userRepository.findById(id);
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format("User with id %s does not exist", id)));
     }
 
     @Override
-    public Optional<User> getUserByEmail(String email) {
-        if (userRepository.findUserByEmail(email).isEmpty()) {
-            throw new UsernameNotFoundException(String.format("User with the address %s does not exist", email));
-        }
-
-        return userRepository.findUserByEmail(email);
+    public User getUserByEmail(String email) {
+        return userRepository.findUserByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                String.format("User with the address %s does not exist", email)
+                        )
+                );
     }
 
     /**
